@@ -1,10 +1,15 @@
 # CleanEditor v1.0.1
 
-Android app in Kotlin and Jetpack Compose (Material 3).
+Aplicativo Android em Kotlin + Jetpack Compose (Material 3).
 
-## Build
-The workflow `.github/workflows/android-build.yml` builds the debug APK on GitHub Actions with Java 17, Gradle 8.9 and Android SDK 34.
+## Código-fonte
 
-**Important:** The source files under `app/src/main` still need to be uploaded from the complete CleanEditor v1.0.1 source archive. The app will not build until those are added.
+O arquivo `CleanEditor-v1.0.1-source.zip` na raiz contém o projeto completo. Os arquivos de configuração básicos também foram publicados diretamente. O GitHub Actions **extrai o ZIP original antes de compilar**, garantindo a presença de todos os arquivos Kotlin, recursos e manifesto.
 
-After the full source is uploaded, go to **Actions > Compilar APK Android > Run workflow**, and after a successful run download the artifact `CleanEditor-debug-apk`.
+## Gerar APK
+
+Em [Actions](https://github.com/edgarcdc5-ux/blocos/actions), abra **Compilar APK Android** e execute **Run workflow**, ou aguarde a execução automática do último push.
+
+O workflow usa Java 17, Gradle 8.9 e Android SDK 34. Após **sucesso**, baixe o artefato `CleanEditor-debug-apk`, contendo o APK de depuração.
+
+A compilação precisa ser verificada nos logs. O código-fonte v1.0.1 não tinha compilação confirmada quando foi fornecido.
