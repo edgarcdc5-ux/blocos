@@ -1,15 +1,16 @@
-# CleanEditor v1.0.1
+# CleanEditor v1.0.2 (prévia)
 
-Aplicativo Android em Kotlin + Jetpack Compose (Material 3).
+Desenvolvimento da v1.0.2 em `release/v1.0.2` sem alterar a versão estável `main` (v1.0.1).
 
-## Código-fonte
+## Alterações
 
-O arquivo `CleanEditor-v1.0.1-source.zip` na raiz contém o projeto completo. Os arquivos de configuração básicos também foram publicados diretamente. O GitHub Actions **extrai o ZIP original antes de compilar**, garantindo a presença de todos os arquivos Kotlin, recursos e manifesto.
+- Salvamento automático aproximadamente 1,8 segundo após parar de digitar, nos documentos modificados.
+- Cópia de segurança de rascunho no armazenamento privado antes de cada tentativa de salvar.
+- Preservados: editor, busca/substituição, desfazer/refazer, abas, gerenciador de arquivos, lembretes e realce de sintaxe da v1.0.1.
+- Numeração de versão Android atualizada para 1.0.2 (versionCode 3).
 
-## Gerar APK
+## Compilar
 
-Em [Actions](https://github.com/edgarcdc5-ux/blocos/actions), abra **Compilar APK Android** e execute **Run workflow**, ou aguarde a execução automática do último push.
+Workflow `.github/workflows/android-build.yml`. Extrai o ZIP-base v1.0.1 com `unzip -n` para **não sobrescrever** os arquivos v1.0.2 presentes no repositório. A compilação gera o artefato `CleanEditor-v1.0.2-debug-apk`.
 
-O workflow usa Java 17, Gradle 8.9 e Android SDK 34. Após **sucesso**, baixe o artefato `CleanEditor-debug-apk`, contendo o APK de depuração.
-
-A compilação precisa ser verificada nos logs. O código-fonte v1.0.1 não tinha compilação confirmada quando foi fornecido.
+> A recuperação manual dos backups e funcionalidades adicionais de interface permanecem para uma atualização posterior. Compilação e testes em dispositivo dependem do resultado do GitHub Actions.
