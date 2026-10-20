@@ -1,7 +1,7 @@
 name: Compilar APK Android
 on:
   push:
-    branches: [main]
+    branches: [main, release/v1.0.2]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
       - name: Extrair projeto CleanEditor v1.0.1
         run: |
           test -f CleanEditor-v1.0.1-source.zip
-          unzip -o CleanEditor-v1.0.1-source.zip -d .
+          unzip -n CleanEditor-v1.0.1-source.zip -d .
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -39,7 +39,7 @@ jobs:
       - name: Publicar APK debug
         uses: actions/upload-artifact@v4
         with:
-          name: CleanEditor-debug-apk
+          name: CleanEditor-v1.0.2-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
