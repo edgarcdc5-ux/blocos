@@ -26,10 +26,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Configurar SDK Android
-        uses: android-actions/setup-android@v3
       - name: Instalar Android SDK 34
-        run: sdkmanager --install 'platforms;android-34' 'build-tools;34.0.0'
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install 'platforms;android-34' 'build-tools;34.0.0'
       - name: Configurar Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
