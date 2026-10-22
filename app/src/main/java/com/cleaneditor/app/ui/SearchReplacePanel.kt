@@ -44,7 +44,7 @@ fun SearchReplacePanel(vm: AppViewModel, doc: EditorDoc, onDismiss: () -> Unit) 
         }
     }
     val matches = remember(doc.text, regex) {
-        regex?.findAll(doc.text)?.filter { it.range.first < it.range.last + 1 }?.take(10000)?.toList() ?: emptyList()
+        regex?.findAll(doc.text)?.filter { it.value.isNotEmpty() }?.take(10000)?.toList() ?: emptyList()
     }
     LaunchedEffect(matches.size) {
         if (selectedMatch >= matches.size) selectedMatch = 0
@@ -94,7 +94,7 @@ fun SearchReplacePanel(vm: AppViewModel, doc: EditorDoc, onDismiss: () -> Unit) 
                 Box(Modifier.weight(1f)) {
                     GradientButton("Substituir tudo", modifier = Modifier.fillMaxWidth(), onClick = {
                         if (regex != null && matches.isNotEmpty()) {
-                            vm.replaceText(doc, regex.replace(doc.text, replacement))
+                            vm.replaceText(doc, if (regexMode) regex.replace(doc.text, replacement) else regex.replace(doc.text) { replacement })
                         }
                     })
                 }
