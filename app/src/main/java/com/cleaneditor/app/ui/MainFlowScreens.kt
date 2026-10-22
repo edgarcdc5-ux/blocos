@@ -26,6 +26,9 @@ import com.cleaneditor.app.AppViewModel
 fun MainFlowFiles(vm: AppViewModel) {
     var recentMode by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp)) {
+            ScreenTitle("Arquivos e projetos", "Explore seus arquivos ou retome um documento")
+        }
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Pill("Explorar arquivos", !recentMode) { recentMode = false }
@@ -94,7 +97,10 @@ fun MainFlowEditor(vm: AppViewModel) {
                 Text(if (doc.dirty) "Alterações pendentes" else "Salvo",
                     color = if (doc.dirty) p.medium else p.low, fontSize = 12.sp)
             }
-            Text("EDITOR", color = p.accent, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                Text("EDITOR", color = p.accent, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Busca no editor", color = p.muted, fontSize = 11.sp)
+            }
         }
         Box(Modifier.weight(1f)) { EditorScreen(vm) }
     }
