@@ -6,6 +6,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FindReplace
+import androidx.compose.material.icons.outlined.ChevronLeft
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -46,6 +48,7 @@ fun SearchReplacePanel(vm: AppViewModel, doc: EditorDoc, onDismiss: () -> Unit) 
     val matches = remember(doc.text, regex) {
         regex?.findAll(doc.text)?.filter { it.value.isNotEmpty() }?.take(10000)?.toList() ?: emptyList()
     }
+    val emptyPattern = remember(doc.text, regex) { regex?.findAll(doc.text)?.any { it.value.isEmpty() } == true }
     LaunchedEffect(matches.size) {
         if (selectedMatch >= matches.size) selectedMatch = 0
     }
@@ -76,24 +79,33 @@ fun SearchReplacePanel(vm: AppViewModel, doc: EditorDoc, onDismiss: () -> Unit) 
                 Checkbox(checked = regexMode, onCheckedChange = { regexMode = it })
                 Text("Expressão regular", color = p.text, fontSize = 12.sp)
                 Spacer(Modifier.weight(1f))
-                Text(if (query.isEmpty()) "Digite para buscar" else "${matches.size} resultado(s)",
+                Text(if (query.isEmpty()) "Digite para buscar" else if (matches.isEmpty()) "0 resultados" else "${selectedMatch + 1} de ${matches.size}",
                     color = p.muted, fontSize = 12.sp)
             }
             if (error != null) Text(error!!, color = p.high, fontSize = 12.sp)
+            if (emptyPattern) Text("Busca com ocorrência vazia: substituição desativada", color = p.high, fontSize = 12.sp)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                IconButton(enabled = matches.size > 1, onClick = { selectedMatch = (selectedMatch - 1 + matches.size) % matches.size }) {
+                    Icon(Icons.Outlined.ChevronLeft, "Resultado anterior", tint = p.text)
+                }
+                IconButton(enabled = matches.size > 1, onClick = { selectedMatch = (selectedMatch + 1) % matches.size }) {
+                    Icon(Icons.Outlined.ChevronRight, "Próximo resultado", tint = p.text)
+                }
+            }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 Box(Modifier.weight(1f)) {
                     GradientButton("Substituir", modifier = Modifier.fillMaxWidth(), onClick = {
-                        if (matches.isNotEmpty()) {
+                        if (matches.isNotEmpty() && !emptyPattern) {
                             val match = matches[selectedMatch.coerceIn(matches.indices)]
-                            val resolved = if (regexMode) match.value.replace(regex!!, replacement) else replacement
+                            val resolved = replacement
                             vm.replaceText(doc, doc.text.replaceRange(match.range, resolved))
                         }
                     })
                 }
                 Box(Modifier.weight(1f)) {
                     GradientButton("Substituir tudo", modifier = Modifier.fillMaxWidth(), onClick = {
-                        if (regex != null && matches.isNotEmpty()) {
+                        if (regex != null && matches.isNotEmpty() && !emptyPattern) {
                             vm.replaceText(doc, if (regexMode) regex.replace(doc.text, replacement) else regex.replace(doc.text) { replacement })
                         }
                     })
