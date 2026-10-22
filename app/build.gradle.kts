@@ -11,11 +11,23 @@ android {
         applicationId = "com.cleaneditor.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
+    }
+    signingConfigs {
+        create("production") {
+            val keyFile = System.getenv("ANDROID_KEYSTORE_PATH")
+            if (!keyFile.isNullOrBlank()) {
+                storeFile = file(keyFile)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
     }
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("production")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
