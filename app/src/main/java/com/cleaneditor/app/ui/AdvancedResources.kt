@@ -13,6 +13,21 @@ import androidx.compose.ui.unit.sp
 import com.cleaneditor.app.AppViewModel
 import com.cleaneditor.app.Tab
 
+@Composable
+fun AdvancedToolsTab(vm: AppViewModel) {
+    var advanced by remember { mutableStateOf(false) }
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Pill("Ferramentas", !advanced) { advanced = false }
+            Pill("Recursos avançados", advanced) { advanced = true }
+        }
+        Box(Modifier.weight(1f)) {
+            if (advanced) AdvancedResourcesScreen(vm) else ToolsScreen(vm)
+        }
+    }
+}
+
 /**
  * Etapa 4: ponto de entrada para recursos avançados.
  * O conteúdo abaixo identifica funcionalidades em preparação; não simula
