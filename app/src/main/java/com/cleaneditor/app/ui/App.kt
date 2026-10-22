@@ -58,7 +58,7 @@ fun CleanEditorApp(vm: AppViewModel) {
                                 Tab.INICIO -> MainFlowHome(vm)
                                 Tab.ARQUIVOS -> MainFlowFiles(vm)
                                 Tab.LEMBRETES -> MainFlowReminders(vm)
-                                Tab.IA -> ToolsScreen(vm)
+                                Tab.IA -> AdvancedToolsTab(vm)
                                 Tab.AJUSTES -> SettingsScreen(vm)
                             }
                         }
