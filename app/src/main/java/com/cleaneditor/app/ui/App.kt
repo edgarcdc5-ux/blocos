@@ -57,7 +57,7 @@ fun CleanEditorApp(vm: AppViewModel) {
                             when (t) {
                                 Tab.INICIO -> MainFlowHome(vm)
                                 Tab.ARQUIVOS -> MainFlowFiles(vm)
-                                Tab.LEMBRETES -> RemindersScreen(vm)
+                                Tab.LEMBRETES -> MainFlowReminders(vm)
                                 Tab.IA -> ToolsScreen(vm)
                                 Tab.AJUSTES -> SettingsScreen(vm)
                             }
