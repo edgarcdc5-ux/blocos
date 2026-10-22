@@ -16,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,18 +37,26 @@ fun CleanEditorApp(vm: AppViewModel) {
         LaunchedEffect(vm.message) {
             vm.message?.let { snack.showSnackbar(it); vm.message = null }
         }
+        val context = LocalContext.current
+        val welcomePrefs = remember(context) { context.getSharedPreferences("cleaneditor_ui", android.content.Context.MODE_PRIVATE) }
+        val welcomePending = remember { mutableStateOf(!welcomePrefs.getBoolean("welcome_seen", false)) }
         AuroraBackground {
             Box(Modifier.fillMaxSize().statusBarsPadding()) {
-                if (vm.editorOpen && vm.currentDoc != null) {
+                if (welcomePending.value && !vm.editorOpen) {
+                    WelcomeScreen {
+                        welcomePrefs.edit().putBoolean("welcome_seen", true).apply()
+                        welcomePending.value = false
+                    }
+                } else if (vm.editorOpen && vm.currentDoc != null) {
                     BackHandler { vm.editorOpen = false }
-                    EditorScreen(vm)
+                    MainFlowEditor(vm)
                 } else {
                     BackHandler(enabled = vm.tab != Tab.INICIO) { vm.tab = Tab.INICIO }
                     AnimatedContent(targetState = vm.tab, label = "tab") { t ->
                         Box(Modifier.fillMaxSize()) {
                             when (t) {
-                                Tab.INICIO -> HomeScreen(vm)
-                                Tab.ARQUIVOS -> FilesScreen(vm)
+                                Tab.INICIO -> MainFlowHome(vm)
+                                Tab.ARQUIVOS -> MainFlowFiles(vm)
                                 Tab.LEMBRETES -> RemindersScreen(vm)
                                 Tab.IA -> ToolsScreen(vm)
                                 Tab.AJUSTES -> SettingsScreen(vm)
