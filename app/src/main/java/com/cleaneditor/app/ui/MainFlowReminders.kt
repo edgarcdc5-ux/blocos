@@ -44,6 +44,7 @@ fun MainFlowReminders(vm: AppViewModel) {
     var category by remember { mutableStateOf("Todas") }
     var selectedDay by remember { mutableStateOf<Long?>(null) }
     var monthOffset by remember { mutableIntStateOf(0) }
+    val monthName = remember(monthOffset) { SimpleDateFormat("MMMM yyyy", localeBR).format(Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset) }.time) }
     var editing by remember { mutableStateOf<Reminder?>(null) }
     var creating by remember { mutableStateOf(false) }
     val now = System.currentTimeMillis()
@@ -90,7 +91,7 @@ fun MainFlowReminders(vm: AppViewModel) {
                 item {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
-                        Text(SimpleDateFormat("MMMM yyyy", localeBR).format(Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset) }.time),
+                        Text(monthName.replaceFirstChar { it.uppercase(localeBR) },
                             color = p.text, fontWeight = FontWeight.Bold)
                         Row {
                             IconButton(onClick = { monthOffset-- }) {
@@ -105,7 +106,12 @@ fun MainFlowReminders(vm: AppViewModel) {
                         selectedDay = if (selectedDay != null && dayKey(selectedDay!!) == dayKey(it)) null else it
                     }
                 }
-                item { SearchField(query, "Pesquisar lembretes", { query = it }) }
+                item {
+                    SearchField(query, "Pesquisar lembretes", { query = it })
+                    if (selectedDay != null) TextButton(onClick = { selectedDay = null }) {
+                        Text("Limpar data selecionada")
+                    }
+                }
                 item {
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("Todos", "Hoje", "Amanhã", "Pendentes", "Concluídos", "Importantes").forEach { label ->
@@ -158,6 +164,7 @@ private fun MonthCalendar(offset: Int, selected: Long?, activeDays: List<Int>, o
     }
     val count = start.getActualMaximum(Calendar.DAY_OF_MONTH)
     val pad = start.get(Calendar.DAY_OF_WEEK) - 1
+    val todayKey = dayKey(System.currentTimeMillis())
     Column {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             listOf("D", "S", "T", "Q", "Q", "S", "S").forEach { Text(it, color = p.muted, fontSize = 12.sp) }
@@ -171,9 +178,10 @@ private fun MonthCalendar(offset: Int, selected: Long?, activeDays: List<Int>, o
                             val cal = (start.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, day) }
                             val isSelected = selected != null && dayKey(selected) == dayKey(cal.timeInMillis)
                             val hasItems = dayKey(cal.timeInMillis) in activeDays
+                            val isToday = dayKey(cal.timeInMillis) == todayKey
                             Text(day.toString() + if (hasItems) " •" else "",
                                 color = if (isSelected) p.accent else p.text,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                                 modifier = Modifier.clickable { onPick(cal.timeInMillis) }.padding(7.dp))
                         }
                     }
@@ -192,8 +200,16 @@ private fun ReminderForm(initial: Reminder?, onDismiss: () -> Unit,
     var category by remember(initial?.id) { mutableStateOf(initial?.category ?: "Geral") }
     var priority by remember(initial?.id) { mutableStateOf(initial?.priority ?: Priority.MEDIA) }
     var repeatDaily by remember(initial?.id) { mutableStateOf(initial?.repeatDaily ?: false) }
+    var confirmDelete by remember(initial?.id) { mutableStateOf(false) }
     var time by remember(initial?.id) {
         mutableLongStateOf(initial?.timeMillis ?: Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 1) }.timeInMillis)
+    }
+    if (confirmDelete && initial != null) {
+        AlertDialog(onDismissRequest = { confirmDelete = false },
+            title = { Text("Excluir lembrete?") },
+            text = { Text("Esta ação removerá o lembrete e seu agendamento.") },
+            confirmButton = { TextButton(onClick = { onDelete(initial); confirmDelete = false }) { Text("Excluir") } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } })
     }
     AlertDialog(onDismissRequest = onDismiss,
         title = { Text(if (initial == null) "Novo lembrete" else "Editar lembrete") },
@@ -202,6 +218,7 @@ private fun ReminderForm(initial: Reminder?, onDismiss: () -> Unit,
                 OutlinedTextField(title, { title = it }, label = { Text("Título") }, singleLine = true)
                 OutlinedTextField(content, { content = it }, label = { Text("Descrição") })
                 OutlinedTextField(category, { category = it }, label = { Text("Categoria") }, singleLine = true)
+                Text("Defina a data, a hora e a prioridade do aviso", color = LocalPalette.current.muted, fontSize = 12.sp)
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Pill(SimpleDateFormat("dd/MM/yyyy", localeBR).format(time), false) {
                         val c = Calendar.getInstance().apply { timeInMillis = time }
@@ -227,7 +244,7 @@ private fun ReminderForm(initial: Reminder?, onDismiss: () -> Unit,
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(enabled = title.isNotBlank() && time > System.currentTimeMillis(), onClick = {
                 if (title.isNotBlank()) onSave(Reminder(initial?.id ?: System.currentTimeMillis(),
                     title.trim(), content.trim(), time, repeatDaily, priority,
                     category.ifBlank { "Geral" }, initial?.done ?: false))
@@ -235,7 +252,7 @@ private fun ReminderForm(initial: Reminder?, onDismiss: () -> Unit,
         },
         dismissButton = {
             Row {
-                if (initial != null) TextButton(onClick = { onDelete(initial) }) { Text("Excluir") }
+                if (initial != null) TextButton(onClick = { confirmDelete = true }) { Text("Excluir") }
                 TextButton(onClick = onDismiss) { Text("Cancelar") }
             }
         }
