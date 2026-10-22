@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Icon
@@ -88,6 +90,7 @@ fun RecentDocumentsScreen(vm: AppViewModel) {
 fun MainFlowEditor(vm: AppViewModel) {
     val p = LocalPalette.current
     val doc = vm.currentDoc ?: return
+    var enhancedSearch by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween) {
@@ -97,11 +100,13 @@ fun MainFlowEditor(vm: AppViewModel) {
                 Text(if (doc.dirty) "Alterações pendentes" else "Salvo",
                     color = if (doc.dirty) p.medium else p.low, fontSize = 12.sp)
             }
-            Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
-                Text("EDITOR", color = p.accent, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Busca no editor", color = p.muted, fontSize = 11.sp)
+            IconButton(onClick = { enhancedSearch = !enhancedSearch }) {
+                Icon(if (enhancedSearch) Icons.Outlined.Close else Icons.Outlined.Search,
+                    contentDescription = if (enhancedSearch) "Fechar busca avançada" else "Buscar e substituir",
+                    tint = p.accent)
             }
         }
         Box(Modifier.weight(1f)) { EditorScreen(vm) }
+        if (enhancedSearch) SearchReplacePanel(vm, doc, onDismiss = { enhancedSearch = false })
     }
 }
