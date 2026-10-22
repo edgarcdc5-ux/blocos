@@ -50,11 +50,12 @@ fun MainFlowReminders(vm: AppViewModel) {
     val now = System.currentTimeMillis()
     val today = dayKey(now)
     val tomorrow = dayKey(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }.timeInMillis)
+    fun recurringOn(r: Reminder, date: Long) = r.repeatDaily && !r.done && dayKey(date) >= dayKey(r.timeMillis)
     val categories = listOf("Todas") + vm.reminders.map { it.category.ifBlank { "Geral" } }.distinct().sorted()
     val shown = vm.reminders.filter { r ->
         val status = when(filter) {
-            "Hoje" -> dayKey(r.timeMillis) == today || (r.repeatDaily && !r.done)
-            "Amanhã" -> dayKey(r.timeMillis) == tomorrow || (r.repeatDaily && !r.done)
+            "Hoje" -> dayKey(r.timeMillis) == today || recurringOn(r, now)
+            "Amanhã" -> dayKey(r.timeMillis) == tomorrow || recurringOn(r, Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }.timeInMillis)
             "Pendentes" -> !r.done
             "Concluídos" -> r.done
             "Importantes" -> r.priority == Priority.ALTA
@@ -62,7 +63,7 @@ fun MainFlowReminders(vm: AppViewModel) {
         }
         val textMatch = r.title.contains(query.trim(), true) || r.content.contains(query.trim(), true)
         val categoryMatch = category == "Todas" || r.category == category
-        val dateMatch = selectedDay == null || dayKey(r.timeMillis) == dayKey(selectedDay!!) || (r.repeatDaily && !r.done)
+        val dateMatch = selectedDay == null || dayKey(r.timeMillis) == dayKey(selectedDay!!) || recurringOn(r, selectedDay!!)
         status && textMatch && categoryMatch && dateMatch
     }.sortedWith(compareBy<Reminder> { it.done }.thenBy { it.timeMillis })
     Column(Modifier.fillMaxSize()) {
@@ -159,7 +160,7 @@ fun MainFlowReminders(vm: AppViewModel) {
 private fun MonthCalendar(offset: Int, selected: Long?, activeDays: List<Int>, onPick: (Long) -> Unit) {
     val p = LocalPalette.current
     val start = Calendar.getInstance().apply {
-        add(Calendar.MONTH, offset); set(Calendar.DAY_OF_MONTH, 1)
+        set(Calendar.DAY_OF_MONTH, 1); add(Calendar.MONTH, offset)
         set(Calendar.HOUR_OF_DAY, 12); set(Calendar.MINUTE, 0)
     }
     val count = start.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -211,7 +212,7 @@ private fun ReminderForm(initial: Reminder?, onDismiss: () -> Unit,
             confirmButton = { TextButton(onClick = { onDelete(initial); confirmDelete = false }) { Text("Excluir") } },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } })
     }
-    AlertDialog(onDismissRequest = onDismiss,
+    if (!confirmDelete) AlertDialog(onDismissRequest = onDismiss,
         title = { Text(if (initial == null) "Novo lembrete" else "Editar lembrete") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -245,7 +246,7 @@ private fun ReminderForm(initial: Reminder?, onDismiss: () -> Unit,
         },
         confirmButton = {
             TextButton(enabled = title.isNotBlank() && time > System.currentTimeMillis(), onClick = {
-                if (title.isNotBlank()) onSave(Reminder(initial?.id ?: System.currentTimeMillis(),
+                if (title.isNotBlank() && time > System.currentTimeMillis()) onSave(Reminder(initial?.id ?: System.currentTimeMillis(),
                     title.trim(), content.trim(), time, repeatDaily, priority,
                     category.ifBlank { "Geral" }, initial?.done ?: false))
             }) { Text("Salvar") }
