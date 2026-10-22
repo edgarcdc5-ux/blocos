@@ -74,7 +74,14 @@ fun AdvancedResourcesScreen(vm: AppViewModel) {
             Pill("Histórico", section == "Histórico") { section = "Histórico"; refresh++ }
         }
         if (feedback.isNotBlank()) Text(feedback, color = p.accent)
-        if (section != "Início") {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("Modelos", "Favoritos e tags", "Compartilhar e exportar").forEach { name ->
+                Pill(name, section == name) { section = name }
+            }
+        }
+        if (section in listOf("Modelos", "Favoritos e tags", "Compartilhar e exportar")) {
+            AdvancedDocumentTools(vm, section)
+        } else if (section != "Início") {
             Text("As cópias são locais. Recuperar cria um NOVO arquivo, sem sobrescrever o original.",
                 color = p.muted, fontSize = 12.sp)
             Spacer(Modifier.height(12.dp))
@@ -125,10 +132,10 @@ fun AdvancedResourcesScreen(vm: AppViewModel) {
             "Favoritos e tags" to "Agrupar e encontrar documentos rapidamente",
             "Compartilhar e exportar" to "Exportar documentos e compartilhar com outros aplicativos"
         ).forEach { (title, description) ->
-            GlassCard(Modifier.fillMaxWidth()) {
+            GlassCard(Modifier.fillMaxWidth(), onClick = { section = title }) {
                 Text(title, color = p.text)
                 Text(description, color = p.muted, fontSize = 12.sp)
-                Text("Em desenvolvimento", color = p.accent, fontSize = 11.sp)
+                Text("Abrir módulo", color = p.accent, fontSize = 11.sp)
             }
             Spacer(Modifier.height(10.dp))
         }
