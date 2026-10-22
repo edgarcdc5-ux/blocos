@@ -1,7 +1,7 @@
 name: Compilar APK Android
 on:
   push:
-    branches: [main, release/v1.0.2]
+    branches: [main, release/v1.0.2, design/etapa-1-base-visual]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
       - name: Publicar APK debug
         uses: actions/upload-artifact@v4
         with:
-          name: CleanEditor-v1.0.2-debug-apk
+          name: CleanEditor-etapa-1-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
