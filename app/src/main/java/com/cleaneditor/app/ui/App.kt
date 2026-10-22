@@ -39,14 +39,14 @@ fun CleanEditorApp(vm: AppViewModel) {
             Box(Modifier.fillMaxSize().statusBarsPadding()) {
                 if (vm.editorOpen && vm.currentDoc != null) {
                     BackHandler { vm.editorOpen = false }
-                    EditorScreen(vm)
+                    MainFlowEditor(vm)
                 } else {
                     BackHandler(enabled = vm.tab != Tab.INICIO) { vm.tab = Tab.INICIO }
                     AnimatedContent(targetState = vm.tab, label = "tab") { t ->
                         Box(Modifier.fillMaxSize()) {
                             when (t) {
                                 Tab.INICIO -> MainFlowHome(vm)
-                                Tab.ARQUIVOS -> FilesScreen(vm)
+                                Tab.ARQUIVOS -> MainFlowFiles(vm)
                                 Tab.LEMBRETES -> RemindersScreen(vm)
                                 Tab.IA -> ToolsScreen(vm)
                                 Tab.AJUSTES -> SettingsScreen(vm)
