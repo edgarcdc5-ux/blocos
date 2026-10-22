@@ -45,7 +45,7 @@ fun CleanEditorApp(vm: AppViewModel) {
                     AnimatedContent(targetState = vm.tab, label = "tab") { t ->
                         Box(Modifier.fillMaxSize()) {
                             when (t) {
-                                Tab.INICIO -> HomeScreen(vm)
+                                Tab.INICIO -> MainFlowHome(vm)
                                 Tab.ARQUIVOS -> FilesScreen(vm)
                                 Tab.LEMBRETES -> RemindersScreen(vm)
                                 Tab.IA -> ToolsScreen(vm)
